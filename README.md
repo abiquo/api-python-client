@@ -30,11 +30,12 @@ import json
 from abiquo.client import Abiquo
 
 api = Abiquo(API_URL, auth=(username, password))
-code, datacenters = api.admin.datacenters.get(headers={'Accept':'application/vnd.abiquo.datacenters+json'})
+code, datacenters = api.admin.datacenters.get(
+    headers={'Accept':'application/vnd.abiquo.datacenters+json'})
 
 print "Response code is: %s" % code
-for datacenter in datacenters:
-    print "Creating rack in datacenter %s [%s]" % (datacenter.name, datacenter.location)
+for dc in datacenters:
+    print "Creating rack in datacenter %s [%s]" % (dc.name, dc.location)
     code, rack = datacenter.follow('racks').post(
             data=json.dumps({'name': 'New rack'}),
             headers={'Accept':'application/vnd.abiquo.rack+json',
@@ -66,7 +67,6 @@ Once you have the tokens, you just have to create the authentication object and 
 Abiquo client as follows:
 
 ```python
-import json
 from requests_oauthlib import OAuth1
 from abiquo.client import Abiquo
 
