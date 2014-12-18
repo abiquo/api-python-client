@@ -94,7 +94,8 @@ def join_url(*args):
 
 def merge_headers(x, y):
     if x and y:
-        return dict(x + y)
+        x.update(y)
+        return x
     elif x:
         return x
     elif y:
