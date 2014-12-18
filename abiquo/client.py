@@ -21,7 +21,7 @@ class Abiquo(object):
         self.headers = {url : headers}
         self.session = requests.session()
 
-    def __getattr__(self, key):      
+    def __getattr__(self, key):
         try:
             return self.__dict__[key]
         except KeyError:
