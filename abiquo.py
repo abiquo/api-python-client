@@ -23,9 +23,6 @@ class Abiquo(object):
             params=params, headers=headers, data=data)
 
     def _request(self, method, url, params=None, headers=None, data=None):
-        # TODO check status_code
-        # TODO return empty?
-        # TODO ErrorDto case
         parent_headers = self.headers[url] if url in self.headers else {}
 
         response = self.session.request(method, 
@@ -35,9 +32,9 @@ class Abiquo(object):
                                         headers=merge_headers(parent_headers, headers), 
                                         data=data)
         if len(response.text) > 0:
-            return ObjectDto(response.json(), auth=self.auth)
+            return response.status_code, ObjectDto(response.json(), auth=self.auth)
 
-        return None
+        return response.status_code, None
 
 class ObjectDto(object):
     def __init__(self, json, auth=None):
