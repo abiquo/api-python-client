@@ -12,19 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
+import re
 from setuptools import setup
 
+def readme():
+    with open('README.md', 'r') as f:
+        return f.read()
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+version_regex = r'__version__ = ["\']([^"\']*)["\']'
+with open('abiquo/__init__.py', 'r') as f:
+    text = f.read()
+    match = re.search(version_regex, text)
+    if match:
+        VERSION = match.group(1)
+    else:
+        raise RuntimeError("No version number found!")
 
 setup(
     name='abiquo-api',
-    version='0.1',
+    version=VERSION,
     description='Abiquo API Python Client',
-    long_description=read('README.md'),
+    long_description=readme(),
     author='Abiquo',
     author_email='developers@abiquo.com',
     url='https://github.com/abiquo/api-python-client',
@@ -32,8 +40,8 @@ setup(
     license='Apache License 2.0',
     keywords='abiquo api rest',
     install_requires=[
-        'requests>=2.0.0',
-        'requests_oauthlib>=0.4.2'
+        'requests >= 2.0.0',
+        'requests_oauthlib >= 0.4.2'
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
