@@ -15,52 +15,64 @@
 import requests
 
 class Abiquo(object):
-    def __init__(self, url, auth=None, headers=None):
+    def __init__(self, url, auth=None, headers=None, params=None):
         self.url = url
         self.auth = auth
         self.headers = {url : headers}
+        self.params = {url : params}
         self.session = requests.session()
 
     def __getattr__(self, key):
         try:
             return self.__dict__[key]
-        except KeyError:
-            self.__dict__[key] = Abiquo(join_url(self.url, key), auth=self.auth)
+        except:
+            self.__dict__[key] = Abiquo(self._join(self.url, key), auth=self.auth)
             return self.__dict__[key]
 
     def get(self, id=None, params=None, headers=None):
-        return self._request('get', self._join_url(self.url, id), 
+        return self._request('get', self._join(self.url, id), 
             params=params, headers=headers)
 
     def post(self, id=None, params=None, headers=None, data=None):
-        return self._request('post', self._join_url(self.url, id), 
+        return self._request('post', self._join(self.url, id), 
             params=params, headers=headers, data=data)
 
     def put(self, id=None, params=None, headers=None, data=None):
-        return self._request('put', self._join_url(self.url, id), 
+        return self._request('put', self._join(self.url, id), 
             params=params, headers=headers, data=data)
 
     def delete(self, id=None, params=None, headers=None):
-        return self._request('delete', self._join_url(self.url, id), 
+        return self._request('delete', self._join(self.url, id), 
             params=params, headers=headers)        
 
     def _request(self, method, url, params=None, headers=None, data=None):
         parent_headers = self.headers[url] if url in self.headers else {}
+        parent_params = self.params[url] if url in self.params else {}
 
         response = self.session.request(method, 
                                         url, 
                                         auth=self.auth, 
-                                        params=params, 
-                                        headers=merge_headers(parent_headers, headers), 
+                                        params=self._merge_dicts(parent_params, params), 
+                                        headers=self._merge_dicts(parent_headers, headers), 
                                         data=data)
         if len(response.text) > 0:
-            # TODO check JSON response
+            # TODO check if response is a JSON 
             return response.status_code, ObjectDto(response.json(), auth=self.auth)
 
         return response.status_code, None
 
-    def _join_url(self, url, id):
-        return self.url if not id else "/".join(self.url, id)
+    def _merge_dicts(self, x, y):
+        if x and y:
+            x.update(y)
+            return x
+        elif x:
+            return x
+        elif y:
+            return y
+        return None
+
+    def _join(self, *args):
+        return "/".join(filter(None, args))
 
 class ObjectDto(object):
     def __init__(self, json, auth=None):
@@ -71,8 +83,14 @@ class ObjectDto(object):
         try:
             return self.__dict__[key]
         except KeyError as ex:
+            return self._find_or_raise(key, ex)
+            
+    def _find_or_raise(self, key, ex):
+        try:
+            return self.json[key]
+        except KeyError:
             try:
-                return self.json[key]
+                return self.follow(key)
             except:
                 raise ex
 
@@ -100,16 +118,3 @@ class ObjectDto(object):
         if not link:
             raise KeyError("link with rel %s not found" % rel)
         return Abiquo(url=link['href'], auth=self.auth, headers={'Accept' : link['type']})
-
-
-
-def merge_headers(x, y):
-    if x and y:
-        x.update(y)
-        return x
-    elif x:
-        return x
-    elif y:
-        return y
-    
-    return None
