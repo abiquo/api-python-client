@@ -15,11 +15,10 @@
 import requests
 
 class Abiquo(object):
-    def __init__(self, url, auth=None, headers=None, params=None):
+    def __init__(self, url, auth=None, headers=None):
         self.url = url
         self.auth = auth
         self.headers = {url : headers}
-        self.params = {url : params}
         self.session = requests.session()
 
     def __getattr__(self, key):
@@ -28,6 +27,11 @@ class Abiquo(object):
         except:
             self.__dict__[key] = Abiquo(self._join(self.url, key), auth=self.auth)
             return self.__dict__[key]
+
+    def __call__(self, *args):
+        if not args:
+            return self
+        return Abiquo(self._join(self.url, *[str(i) for i in args]), auth=self.auth)
 
     def get(self, id=None, params=None, headers=None):
         return self._request('get', self._join(self.url, id), 
@@ -47,29 +51,30 @@ class Abiquo(object):
 
     def _request(self, method, url, params=None, headers=None, data=None):
         parent_headers = self.headers[url] if url in self.headers else {}
-        parent_params = self.params[url] if url in self.params else {}
-
         response = self.session.request(method, 
                                         url, 
                                         auth=self.auth, 
-                                        params=self._merge_dicts(parent_params, params), 
-                                        headers=self._merge_dicts(parent_headers, headers), 
-                                        data=data)
+                                        params=params, 
+                                        data=data,
+                                        headers=self._merge_dicts(parent_headers, headers))
+        response_dto = None
         if len(response.text) > 0:
-            # TODO check if response is a JSON 
-            return response.status_code, ObjectDto(response.json(), auth=self.auth)
+            try:
+                response_dto = ObjectDto(response.json(), auth=self.auth)
+            except ValueError:
+                pass
 
-        return response.status_code, None
+        return response.status_code, response_dto
 
     def _merge_dicts(self, x, y):
-        if x and y:
-            x.update(y)
-            return x
-        elif x:
-            return x
-        elif y:
-            return y
-        return None
+        new_dict = {}
+
+        if x:
+            new_dict.update(x)
+        if y:
+            new_dict.update(y)
+
+        return new_dict
 
     def _join(self, *args):
         return "/".join(filter(None, args))
