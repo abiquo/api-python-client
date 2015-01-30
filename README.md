@@ -44,6 +44,8 @@ for dc in datacenters:
     print "Created Rack: %s" % rack.name
 ```
 
+Note that you don't need to care about pagination, the client handles it internally for you.
+
 ### Using OAuth
 
 To use OAuth first you have to register your client application in the Abiquo API. To do that, you can
