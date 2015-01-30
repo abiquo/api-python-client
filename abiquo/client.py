@@ -130,6 +130,9 @@ class ObjectDto(object):
         except KeyError:
             raise TypeError('object is not iterable')
 
+    def __dir__(self):
+        return dir(type(self)) + self.json.keys()
+
     def _extract_link(self, rel):
         return next((link for link in self.json['links'] if link['rel'] == rel), None)
 
