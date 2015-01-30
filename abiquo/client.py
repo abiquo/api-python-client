@@ -63,17 +63,14 @@ class Abiquo(object):
                 response_dto = ObjectDto(response.json(), auth=self.auth)
             except ValueError:
                 pass
-
         return response.status_code, response_dto
 
     def _merge_dicts(self, x, y):
         new_dict = {}
-
         if x:
             new_dict.update(x)
         if y:
             new_dict.update(y)
-
         return new_dict
 
     def _join(self, *args):
@@ -99,8 +96,18 @@ class ObjectDto(object):
             except:
                 raise ex
 
+    def follow(self, rel):
+        link = self._extract_link(rel)
+        if not link:
+            raise KeyError("link with rel %s not found" % rel)
+        if 'type' in link:
+            return Abiquo(url=link['href'], auth=self.auth, headers={'Accept' : link['type']})
+        return Abiquo(url=link['href'], auth=self.auth)
+
     def __len__(self):
         try:
+            if 'totalSize' in self.json:
+                return self.json['totalSize']
             return len(self.json['collection'])
         except KeyError:
             raise TypeError('object has no len()')
@@ -109,17 +116,18 @@ class ObjectDto(object):
         try:
             for json in self.json['collection']:
                 yield ObjectDto(json, self.auth)
+
+            current_page = self
+            while current_page._has_link('next'):
+                sc, current_page = self.follow('next').get()
+                if sc == 200 and current_page:
+                    for json in current_page.json['collection']:
+                        yield ObjectDto(json, self.auth)
         except KeyError:
             raise TypeError('object is not iterable')
 
-    def __getitem__(self, index):
-        try:
-            return ObjectDto(self.json['collection'][index], self.auth)
-        except KeyError:
-            raise TypeError("object has no attribute '__getitem__'")
+    def _extract_link(self, rel):
+        return next((link for link in self.json['links'] if link['rel'] == rel), None)
 
-    def follow(self, rel):
-        link = next((link for link in self.json['links'] if link['rel'] == rel), None)
-        if not link:
-            raise KeyError("link with rel %s not found" % rel)
-        return Abiquo(url=link['href'], auth=self.auth, headers={'Accept' : link['type']})
+    def _has_link(self, rel):
+        return True if self._extract_link(rel) else False
