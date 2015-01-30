@@ -60,7 +60,8 @@ class Abiquo(object):
         response_dto = None
         if len(response.text) > 0:
             try:
-                response_dto = ObjectDto(response.json(), auth=self.auth)
+                response_dto = ObjectDto(response.json(), auth=self.auth, 
+                    content_type=response.headers.get('content-type', None))
             except ValueError:
                 pass
         return response.status_code, response_dto
@@ -77,9 +78,10 @@ class Abiquo(object):
         return "/".join(filter(None, args))
 
 class ObjectDto(object):
-    def __init__(self, json, auth=None):
+    def __init__(self, json, auth=None, content_type=None):
         self.json = json
         self.auth = auth
+        self.content_type = content_type
 
     def __getattr__(self, key):
         try:
@@ -100,9 +102,7 @@ class ObjectDto(object):
         link = self._extract_link(rel)
         if not link:
             raise KeyError("link with rel %s not found" % rel)
-        if 'type' in link:
-            return Abiquo(url=link['href'], auth=self.auth, headers={'Accept' : link['type']})
-        return Abiquo(url=link['href'], auth=self.auth)
+        return Abiquo(url=link['href'], auth=self.auth, headers={'accept' : link['type']})
 
     def __len__(self):
         try:
@@ -115,14 +115,18 @@ class ObjectDto(object):
     def __iter__(self):
         try:
             for json in self.json['collection']:
-                yield ObjectDto(json, self.auth)
+                yield ObjectDto(json, auth=self.auth)
 
             current_page = self
             while current_page._has_link('next'):
-                sc, current_page = self.follow('next').get()
+                link = self._extract_link('next')
+                client = Abiquo(url=link['href'], 
+                                auth=self.auth, 
+                                headers={'Accept' : link.get('type', self.content_type)})
+                sc, current_page = client.get()
                 if sc == 200 and current_page:
                     for json in current_page.json['collection']:
-                        yield ObjectDto(json, self.auth)
+                        yield ObjectDto(json, auth=self.auth)
         except KeyError:
             raise TypeError('object is not iterable')
 
