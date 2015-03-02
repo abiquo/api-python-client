@@ -15,9 +15,11 @@
 import re
 from setuptools import setup
 
-def readme():
-    with open('README.md', 'r') as f:
-        return f.read()
+try:
+    from pypandoc import convert
+    read_md = lambda f: convert(f, 'rst')
+except ImportError:
+    read_md = lambda f: open(f, 'r').read()
 
 version_regex = r'__version__ = ["\']([^"\']*)["\']'
 with open('abiquo/__init__.py', 'r') as f:
@@ -32,7 +34,7 @@ setup(
     name='abiquo-api',
     version=VERSION,
     description='Abiquo API Python Client',
-    long_description=readme(),
+    long_description=read_md('README.md'),
     author='Abiquo',
     author_email='developers@abiquo.com',
     url='https://github.com/abiquo/api-python-client',
