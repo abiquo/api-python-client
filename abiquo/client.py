@@ -15,10 +15,11 @@
 import requests
 
 class Abiquo(object):
-    def __init__(self, url, auth=None, headers=None):
+    def __init__(self, url, auth=None, headers=None, verify=True):
         self.url = url
         self.auth = auth
         self.headers = {url : headers}
+        self.verify = verify
         self.session = requests.session()
 
     def __getattr__(self, key):
@@ -56,6 +57,7 @@ class Abiquo(object):
                                         auth=self.auth, 
                                         params=params, 
                                         data=data,
+                                        verify=self.verify,
                                         headers=self._merge_dicts(parent_headers, headers))
         response_dto = None
         if len(response.text) > 0:
