@@ -26,13 +26,15 @@ class Abiquo(object):
         try:
             return self.__dict__[key]
         except:
-            self.__dict__[key] = Abiquo(self._join(self.url, key), auth=self.auth)
+            self.__dict__[key] = Abiquo(self._join(self.url, key), auth=self.auth,
+                    verify=self.verify)
             return self.__dict__[key]
 
     def __call__(self, *args):
         if not args:
             return self
-        return Abiquo(self._join(self.url, *[str(i) for i in args]), auth=self.auth)
+        return Abiquo(self._join(self.url, *[str(i) for i in args]), auth=self.auth,
+                verify=self.verify)
 
     def get(self, id=None, params=None, headers=None):
         return self._request('get', self._join(self.url, id), 
@@ -104,7 +106,8 @@ class ObjectDto(object):
         link = self._extract_link(rel)
         if not link:
             raise KeyError("link with rel %s not found" % rel)
-        return Abiquo(url=link['href'], auth=self.auth, headers={'accept' : link['type']})
+        return Abiquo(url=link['href'], auth=self.auth, headers={'accept' : link['type']},
+                verify=self.verify)
 
     def __len__(self):
         try:
@@ -124,7 +127,8 @@ class ObjectDto(object):
                 link = self._extract_link('next')
                 client = Abiquo(url=link['href'], 
                                 auth=self.auth, 
-                                headers={'Accept' : link.get('type', self.content_type)})
+                                headers={'Accept' : link.get('type', self.content_type)},
+                                verify=self.verify)
                 sc, current_page = client.get()
                 if sc == 200 and current_page:
                     for json in current_page.json['collection']:
