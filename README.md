@@ -108,8 +108,8 @@ And that's it! Now you can use the Abiquo client as shown in the Basic Authentic
 You can run the unit tests as follows:
 
 ```bash
-pip install httpretty
-python test_client.py
+pip install requests requests_oauthlib httpretty
+python -m unittest discover -v
 ```
 
 ## Contributing
