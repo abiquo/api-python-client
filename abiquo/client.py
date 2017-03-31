@@ -94,6 +94,9 @@ class ObjectDto(object):
             return self.__dict__[key]
         except KeyError as ex:
             return self._find_or_raise(key, ex)
+
+    def __setattr__(self, key, value):
+        self.__dict__[key] = value
             
     def _find_or_raise(self, key, ex):
         try:
@@ -103,6 +106,25 @@ class ObjectDto(object):
                 return self.follow(key)
             except:
                 raise ex
+
+    def refresh(self):
+        if self._extract_link('edit') is not None:
+            self.follow('edit').get()
+        else:
+            self.follow('self').get()
+
+    def put(self, data=data):
+        if self._extract_link('edit') is None:
+            raise TypeError('object is not editable')
+        link_type = self._extract_link('edit')['type']
+        return self.follow('edit').put(headers={'Content-Type': link_type}, data=data)
+
+    def delete(self):
+        if self._has_link('edit')
+            link = 'edit'
+        else:
+            link = 'self'
+        return self.follow(link).delete()
 
     def follow(self, rel):
         link = self._extract_link(rel)
