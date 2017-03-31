@@ -225,6 +225,14 @@ class TestClient(unittest.TestCase):
         assert 'newprop' not in obj.__dict__
         assert obj.newprop == 'bar'
 
+    def test_object_links_accessors(self):
+        data = {'links': [{'rel': 'foo', 'type': 'bar', 'href': 'http://localhost'}]}
+        obj = ObjectDto(data)
+        
+        linked = obj.foo
+        assert 'http://localhost' in linked.headers
+        assert linked.headers['http://localhost']['accept'] == 'bar'
+
 if __name__ == '__main__':
     httpretty.enable()
     unittest.main()

@@ -110,7 +110,10 @@ class ObjectDto(object):
         if key in self.json:
             return self.json[key]
         else:
-            raise KeyError
+            try:
+                return self.follow(key)
+            except:
+                raise KeyError
 
     def refresh(self):
         self.follow('edit' if self._has_link('edit') else 'self').get()
