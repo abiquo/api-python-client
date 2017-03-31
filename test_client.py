@@ -17,6 +17,7 @@ import json
 import unittest
 
 from abiquo.client import Abiquo
+from abiquo.client import ObjectDto
 from urlparse import parse_qs
 from urlparse import urlparse
 
@@ -211,6 +212,18 @@ class TestClient(unittest.TestCase):
 
         cli.post(headers={'h1':'c', 'h2':'b'})
         assert_request('/api', method='POST', headers={'h1':'c', 'h2':'b'})
+
+    def test_object_accessors(self):
+        obj = ObjectDto(json={}, content_type='dummy')
+        obj.newprop = 'foo'
+        obj.content_type = 'updated'
+        obj.newprop = 'bar'
+
+        assert obj.__dict__['content_type'] == 'updated'
+        assert obj.content_type == 'updated'
+        assert obj.json['newprop'] == 'bar'
+        assert 'newprop' not in obj.__dict__
+        assert obj.newprop == 'bar'
 
 if __name__ == '__main__':
     httpretty.enable()
