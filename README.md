@@ -103,6 +103,15 @@ api = Abiquo(API_URL, auth=oauth)
 
 And that's it! Now you can use the Abiquo client as shown in the Basic Authentication examples.
 
+## Running the tests
+
+You can run the unit tests as follows:
+
+```bash
+pip install httpretty
+python test_client.py
+```
+
 ## Contributing
 
 This project is still in an early development stage and is still incomplete. All
