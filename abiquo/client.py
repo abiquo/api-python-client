@@ -108,16 +108,16 @@ class ObjectDto(object):
                 raise ex
 
     def refresh(self):
-        if self._extract_link('edit') is not None:
+        if self._has_link('edit'):
             self.follow('edit').get()
         else:
             self.follow('self').get()
 
-    def put(self, data=data):
-        if self._extract_link('edit') is None:
+    def put(self):
+        if not self._has_link('edit'):
             raise TypeError('object is not editable')
         link_type = self._extract_link('edit')['type']
-        return self.follow('edit').put(headers={'Content-Type': link_type}, data=data)
+        return self.follow('edit').put(headers={'Content-Type': link_type}, data=json.dumps(self.json))
 
     def delete(self):
         if self._has_link('edit')
