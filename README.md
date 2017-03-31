@@ -1,5 +1,7 @@
 # Abiquo API Python Client
 
+[![Build Status](https://travis-ci.org/abiquo/api-python-client.svg?branch=master)](https://travis-ci.org/abiquo/api-python-client)
+
 This is a Python client for the Abiquo API. It allows to consume the API
 in a dynamic way and to navigate its resources using its built-in linking
 features.
