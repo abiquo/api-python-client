@@ -107,13 +107,10 @@ class ObjectDto(object):
                 self.__dict__[key] = value
             
     def _find_or_raise(self, key):
-        try:
+        if key in self.json:
             return self.json[key]
-        except KeyError:
-            try:
-                return self.follow(key)
-            except:
-                raise KeyError
+        else:
+            raise KeyError
 
     def refresh(self):
         self.follow('edit' if self._has_link('edit') else 'self').get()
