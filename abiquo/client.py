@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import requests
+import requests, json
 
 class Abiquo(object):
     def __init__(self, url, auth=None, headers=None, verify=True):
@@ -90,16 +90,16 @@ class ObjectDto(object):
         self.verify = verify
 
     def __getattr__(self, key):
-        if hasattr(self, key):
+        try:
             return self.__dict__[key]
-        else:
+        except KeyError as ex:
             return self._find_or_raise(key, ex)
 
     def __setattr__(self, key, value):
-        if hasattr(self, key):
-            self.__dict__[key] = value
+        if 'json' in self.__dict__:
+            self.__dict__['json'][key] = value
         else:
-            self.json[key] = value
+            self.__dict__[key] = value
             
     def _find_or_raise(self, key, ex):
         try:
@@ -123,7 +123,7 @@ class ObjectDto(object):
         return self.follow('edit').put(headers={'Content-Type': link_type}, data=json.dumps(self.json))
 
     def delete(self):
-        if self._has_link('edit')
+        if self._has_link('edit'):
             link = 'edit'
         else:
             link = 'self'
