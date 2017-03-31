@@ -92,10 +92,10 @@ class ObjectDto(object):
         self.json = json
 
     def __getattr__(self, key):
-        try:
+        if key in self.__dict__:
             return self.__dict__[key]
-        except KeyError as ex:
-            return self._find_or_raise(key, ex)
+        else:
+            return self._find_or_raise(key)
 
     def __setattr__(self, key, value):
         if key in self.__dict__:
@@ -106,21 +106,18 @@ class ObjectDto(object):
             else:
                 self.__dict__[key] = value
             
-    def _find_or_raise(self, key, ex):
+    def _find_or_raise(self, key):
         try:
             return self.json[key]
         except KeyError:
             try:
                 return self.follow(key)
             except:
-                raise ex
+                raise KeyError
 
     def refresh(self):
-        if self._has_link('edit'):
-            self.follow('edit').get()
-        else:
-            self.follow('self').get()
-
+        self.follow('edit' if self._has_link('edit') else 'self').get()
+        
     def put(self):
         if not self._has_link('edit'):
             raise TypeError('object is not editable')
@@ -128,11 +125,7 @@ class ObjectDto(object):
         return self.follow('edit').put(headers={'Content-Type': link_type}, data=json.dumps(self.json))
 
     def delete(self):
-        if self._has_link('edit'):
-            link = 'edit'
-        else:
-            link = 'self'
-        return self.follow(link).delete()
+        self.follow('edit' if self._has_link('edit') else 'self').delete()
 
     def follow(self, rel):
         link = self._extract_link(rel)
