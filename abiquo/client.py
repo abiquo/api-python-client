@@ -84,10 +84,12 @@ class Abiquo(object):
 
 class ObjectDto(object):
     def __init__(self, json, auth=None, content_type=None, verify=True):
-        self.json = json
         self.auth = auth
         self.content_type = content_type
         self.verify = verify
+
+        # JSON needs to be at the end because of the implementation in __setattr__
+        self.json = json
 
     def __getattr__(self, key):
         try:
