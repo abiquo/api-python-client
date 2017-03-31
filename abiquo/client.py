@@ -65,7 +65,8 @@ class Abiquo(object):
         if len(response.text) > 0:
             try:
                 response_dto = ObjectDto(response.json(), auth=self.auth, 
-                    content_type=response.headers.get('content-type', None))
+                    content_type=response.headers.get('content-type', None),
+                    verify=self.verify)
             except ValueError:
                 pass
         return response.status_code, response_dto
@@ -82,10 +83,11 @@ class Abiquo(object):
         return "/".join(filter(None, args))
 
 class ObjectDto(object):
-    def __init__(self, json, auth=None, content_type=None):
+    def __init__(self, json, auth=None, content_type=None, verify=True):
         self.json = json
         self.auth = auth
         self.content_type = content_type
+        self.verify = verify
 
     def __getattr__(self, key):
         try:
@@ -120,7 +122,7 @@ class ObjectDto(object):
     def __iter__(self):
         try:
             for json in self.json['collection']:
-                yield ObjectDto(json, auth=self.auth)
+                yield ObjectDto(json, auth=self.auth, verify=self.verify)
 
             current_page = self
             while current_page._has_link('next'):
@@ -132,7 +134,7 @@ class ObjectDto(object):
                 sc, current_page = client.get()
                 if sc == 200 and current_page:
                     for json in current_page.json['collection']:
-                        yield ObjectDto(json, auth=self.auth)
+                        yield ObjectDto(json, auth=self.auth, verify=self.verify)
         except KeyError:
             raise TypeError('object is not iterable')
 
