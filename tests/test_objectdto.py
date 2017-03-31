@@ -12,11 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import httpretty
+import json
 import unittest
 
+from . import *
 from abiquo.client import ObjectDto
     
 class TestObjectDto(unittest.TestCase):   
+    @classmethod
+    def setUpClass(cls):
+        httpretty.enable()
+
+    @classmethod
+    def tearDownClass(cls):
+        httpretty.disable()
 
     def test_object_accessors(self):
         obj = ObjectDto(json={}, content_type='dummy')
@@ -37,4 +47,44 @@ class TestObjectDto(unittest.TestCase):
         linked = obj.foo
         self.assertIn('http://localhost', linked.headers)
         self.assertEqual(linked.headers['http://localhost']['accept'], 'bar')
+
+    def test_put_self(self):
+        data = {'foo':'bar','links':[{'rel':'edit','href':'http://fake/api/admin/datacenters/1',
+            'type':'application/vnd.abiquo.datacenter+json'}]}
+        register('GET', 'http://fake/api/admin/datacenters/1', 200, json.dumps(data))
+
+        updated = data
+        updated['foo'] = 'updated'
+        register('PUT', 'http://fake/api/admin/datacenters/1', 200, json.dumps(updated))
+
+        res, obj = api.admin.datacenters.get(id='1')
+        obj.foo = 'updated'
+        obj.put()
+
+        assert_request(self, '/api/admin/datacenters/1', method='PUT', body=json.dumps(updated),
+                headers={'accept': 'application/vnd.abiquo.datacenter+json',
+                         'content-type': 'application/vnd.abiquo.datacenter+json'})
+
+    def test_delete_self(self):
+        data = {'foo':'bar','links':[{'rel':'edit','href':'http://fake/api/admin/datacenters/1',
+            'type':'application/vnd.abiquo.datacenter+json'}]}
+        register('GET', 'http://fake/api/admin/datacenters/1', 200, json.dumps(data))
+        register('DELETE', 'http://fake/api/admin/datacenters/1', 204, '{}')
+
+        res, obj = api.admin.datacenters.get(id='1')
+        obj.delete()
+
+        assert_request(self, '/api/admin/datacenters/1', method='DELETE')
+
+    def test_refresh_self(self):
+        data = json.dumps({'foo':'bar','links':[{'rel':'edit','href':'http://fake/api/admin/datacenters/1',
+            'type':'application/vnd.abiquo.datacenter+json'}]})
+        register('GET', 'http://fake/api/admin/datacenters/1', 200, data)
+        register('DELETE', 'http://fake/api/admin/datacenters/1', 200, data)
+
+        res, obj = api.admin.datacenters.get(id='1')
+        obj.refresh()
+
+        assert_request(self, '/api/admin/datacenters/1', method='GET',
+                headers={'accept': 'application/vnd.abiquo.datacenter+json'})
 
