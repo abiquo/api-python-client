@@ -96,10 +96,13 @@ class ObjectDto(object):
             return self._find_or_raise(key, ex)
 
     def __setattr__(self, key, value):
-        if 'json' in self.__dict__:
-            self.__dict__['json'][key] = value
-        else:
+        if key in self.__dict__:
             self.__dict__[key] = value
+        else:
+            if 'json' in self.__dict__:
+                self.__dict__['json'][key] = value
+            else:
+                self.__dict__[key] = value
             
     def _find_or_raise(self, key, ex):
         try:
