@@ -90,13 +90,16 @@ class ObjectDto(object):
         self.verify = verify
 
     def __getattr__(self, key):
-        try:
+        if hasattr(self, key):
             return self.__dict__[key]
-        except KeyError as ex:
+        else:
             return self._find_or_raise(key, ex)
 
     def __setattr__(self, key, value):
-        self.__dict__[key] = value
+        if hasattr(self, key):
+            self.__dict__[key] = value
+        else:
+            self.json[key] = value
             
     def _find_or_raise(self, key, ex):
         try:
