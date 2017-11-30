@@ -169,3 +169,14 @@ class ObjectDto(object):
 
     def _has_link(self, rel):
         return True if self._extract_link(rel) else False
+
+
+def check_response(expected_code, code, errors):
+    if code != expected_code:
+	try:
+	    first_error = errors.json['collection'][0]
+	except:
+	    # If it is not an Abiquo controlled error, throw a generic error
+	    raise Exception("HTTP(%s) Operation failed!" % code)
+	# If it is an Abiquo error, properly show the error code and error details
+	raise Exception("HTTP(%s) %s: %s" % (code, first_error['code'], first_error['message']))

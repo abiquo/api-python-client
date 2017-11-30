@@ -48,6 +48,19 @@ for dc in datacenters:
 
 Note that you don't need to care about pagination, the client handles it internally for you.
 
+### Using an OpenID Bearer access token
+
+If your platform uses OpenID and you have a Bearer access token, you can configure the client
+as follows:
+
+```python
+import json
+from abiquo.client import Abiquo
+from abiquo.auth import BearerTokenAuth 
+
+api = Abiquo(API_URL, auth=BearerTokenAuth(token))
+```
+
 ### Using OAuth
 
 To use OAuth first you have to register your client application in the Abiquo API. To do that, you can
