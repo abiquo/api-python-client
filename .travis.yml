@@ -4,6 +4,8 @@ install: pip install requests requests_oauthlib httpretty
 script: python -m unittest discover -v
 deploy:
   provider: pypi
-  user: nacx
+  on:
+    tags: true
+  user: abiquo
   password:
-    secure: RbC/Ua0tVnt0uJzc7akBU4///L7rxMSTm7HzzfN2Vk1k+Kmv9KZEX4RLvNqCFhlzPHnAxSFPxvr/QURpqVFxlvLVrZ5M1A6LryLXK6ZxpmgIuDEibvcNhhPPCc0Phq12g1owOVFKh9XPUomnYRAUaaCKG+p7N7WopqNH6BnrKlQ=
+    secure: LuupLqFXi3NeIVNUaGk8h+usy//lP+tCP7zpzwdkZznhppW3B1ae39Qr74JUGrw78e1UWX23tDteheMJBncSiNpWFexo25+XgY8oEyxaMkcIoVSnCyh8FcyC/u09pUZFtwpjvc9rkmrkPMEodfKXH77ewD0TFC7+AC0Z9ZlJKrI=
