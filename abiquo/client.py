@@ -149,7 +149,7 @@ class ObjectDto(object):
 
             current_page = self
             while current_page._has_link('next'):
-                link = self._extract_link('next')
+                link = current_page._extract_link('next')
                 client = Abiquo(url=link['href'], 
                                 auth=self.auth, 
                                 headers={'Accept' : link.get('type', self.content_type)},
