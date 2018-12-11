@@ -14,11 +14,12 @@
 
 import json
 import requests
+import sys
 
 from authorize import Credentials
 from authorize import get_access_token
 from requests_oauthlib import OAuth1Session
-
+from os.path import isfile
 
 def register_app(api_url, credentials, app_name):
     """ Registers a new Application in the Abiquo API. """ 
@@ -34,8 +35,22 @@ def register_app(api_url, credentials, app_name):
 
 if __name__ == '__main__':
     api_url = raw_input('Abiquo API endpoint: ')
-    identity = raw_input('Username or OpenID access_token (prefixed with "openid:"): ')
-    credential = None if identity.startswith('openid:') else raw_input('Password: ')
+    id_input = raw_input('Username or OpenID access_token (prefixed with "openid:") or file (prefixed with "file:"): ')
+    identity = None
+    credential = None
+    if id_input.startswith('openid:'):
+        identity = id_input.rstrip()
+    elif id_input.startswith('file:'):
+        fpath = id_input.split(":")[-1]
+        try:
+            f = open(fpath, 'r')
+            identity = f.read().rstrip()
+        except IOError as e:
+            print "Error reading file '%s'" % fpath
+            sys.exit(1)
+    else:
+        identity = id_input
+        credential = raw_input('Password: ')
     app_name = raw_input('Application name: ')
     credentials = Credentials(identity, credential)
     appkey, appsecret = register_app(api_url, credentials, app_name)
