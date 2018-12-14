@@ -115,17 +115,17 @@ class ObjectDto(object):
             except:
                 raise KeyError
 
-    def refresh(self):
-        self.follow('edit' if self._has_link('edit') else 'self').get()
+    def refresh(self, params=None, headers=None):
+        return self.follow('edit' if self._has_link('edit') else 'self').get(params=params, headers=headers)
         
-    def put(self):
+    def put(self, params=None):
         if not self._has_link('edit'):
             raise TypeError('object is not editable')
         link_type = self._extract_link('edit')['type']
-        return self.follow('edit').put(headers={'Content-Type': link_type}, data=json.dumps(self.json))
+        return self.follow('edit').put(params=params, headers={'Content-Type': link_type}, data=json.dumps(self.json))
 
-    def delete(self):
-        self.follow('edit' if self._has_link('edit') else 'self').delete()
+    def delete(self, params=None, headers=None):
+        return self.follow('edit' if self._has_link('edit') else 'self').delete(params=params, headers=headers)
 
     def follow(self, rel):
         link = self._extract_link(rel)
@@ -173,10 +173,10 @@ class ObjectDto(object):
 
 def check_response(expected_code, code, errors):
     if code != expected_code:
-	try:
-	    first_error = errors.json['collection'][0]
-	except:
-	    # If it is not an Abiquo controlled error, throw a generic error
-	    raise Exception("HTTP(%s) Operation failed!" % code)
-	# If it is an Abiquo error, properly show the error code and error details
-	raise Exception("HTTP(%s) %s: %s" % (code, first_error['code'], first_error['message']))
+        try:
+            first_error = errors.json['collection'][0]
+        except:
+            # If it is not an Abiquo controlled error, throw a generic error
+            raise Exception("HTTP(%s) Operation failed!" % code)
+        # If it is an Abiquo error, properly show the error code and error details
+        raise Exception("HTTP(%s) %s: %s" % (code, first_error['code'], first_error['message']))
