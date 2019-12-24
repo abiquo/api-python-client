@@ -134,6 +134,9 @@ class ObjectDto(object):
         return Abiquo(url=link['href'], auth=self.auth, headers={'accept' : link['type']},
                 verify=self.verify)
 
+    def link(self, rel):
+        return self._extract_link(rel)
+
     def __len__(self):
         try:
             if 'totalSize' in self.json:
@@ -170,13 +173,10 @@ class ObjectDto(object):
     def _has_link(self, rel):
         return True if self._extract_link(rel) else False
 
-
 def check_response(expected_code, code, errors):
     if code != expected_code:
         try:
-            first_error = errors.json['collection'][0]
+            raise Exception(",".join([error['code'] + " - " + error['message'] for error in errors.json['collection']]))
         except:
             # If it is not an Abiquo controlled error, throw a generic error
             raise Exception("HTTP(%s) Operation failed!" % code)
-        # If it is an Abiquo error, properly show the error code and error details
-        raise Exception("HTTP(%s) %s: %s" % (code, first_error['code'], first_error['message']))
