@@ -63,6 +63,16 @@ from abiquo.auth import BearerTokenAuth
 api = Abiquo(API_URL, auth=BearerTokenAuth(token))
 ```
 
+### Using a token authentication
+
+```python
+import json
+from abiquo.client import Abiquo
+from abiquo.auth import TokenAuth 
+
+api = Abiquo(API_URL, auth=TokenAuth(token))
+```
+
 ### Using OAuth
 
 To use OAuth first you have to register your client application in the Abiquo API. To do that, you can
