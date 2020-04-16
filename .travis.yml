@@ -1,5 +1,5 @@
 language: python
-python: '2.7'
+python: 2.7.15
 install: pip install requests requests_oauthlib httpretty
 script: python -m unittest discover -v
 deploy:
@@ -8,4 +8,4 @@ deploy:
     tags: true
   user: abiquo
   password:
-    secure: LuupLqFXi3NeIVNUaGk8h+usy//lP+tCP7zpzwdkZznhppW3B1ae39Qr74JUGrw78e1UWX23tDteheMJBncSiNpWFexo25+XgY8oEyxaMkcIoVSnCyh8FcyC/u09pUZFtwpjvc9rkmrkPMEodfKXH77ewD0TFC7+AC0Z9ZlJKrI=
+    secure: UJ4MjqixyMK2Nv+Q5x/bsC5aTwPpjZxqxxj+sgs++ZUwquPSlGxPxZL7fdjDIIVmfi2Dbrh628ojEY+JvTgsVpcLMuF9DetMz1j4Gk7le5waOuL6kdQxcGFtrDU3vtIl9tL36Kte023bCAEo6peFXoskegBcwjDyDyygYgE2QTE=

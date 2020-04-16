@@ -34,6 +34,7 @@ setup(
     name='abiquo-api',
     version=VERSION,
     description='Abiquo API Python Client',
+    long_description_content_type='text/markdown',
     long_description=read_md('README.md'),
     author='Abiquo',
     author_email='developers@abiquo.com',
