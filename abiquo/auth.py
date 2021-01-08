@@ -14,18 +14,20 @@
 
 from requests.auth import AuthBase
 
+
 class BearerTokenAuth(AuthBase):
     def __init__(self, token):
-	self.token = token
+        self.token = token
 
     def __call__(self, request):
-	request.headers['Authorization'] = "Bearer %s" % self.token
-	return request
+        request.headers['Authorization'] = "Bearer %s" % self.token
+        return request
+
 
 class TokenAuth(AuthBase):
     def __init__(self, token):
-	self.token = token
+        self.token = token
 
     def __call__(self, request):
-	request.headers['Authorization'] = "Token %s" % self.token
-	return request
+        request.headers['Authorization'] = "Token %s" % self.token
+        return request
